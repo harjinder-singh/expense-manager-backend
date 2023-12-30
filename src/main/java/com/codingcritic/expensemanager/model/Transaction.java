@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name="Transaction")
@@ -34,6 +33,8 @@ public class Transaction {
     private double amount;
     private TransactionType transactionType;
     private TransactionSubType transactionSubType;
+    @Temporal(TemporalType.DATE)
+    private Date transactionDate;
     @Column(updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
