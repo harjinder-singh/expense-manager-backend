@@ -1,8 +1,6 @@
 package com.codingcritic.expensemanager.controller;
 
-import com.codingcritic.expensemanager.model.Account;
 import com.codingcritic.expensemanager.model.Transaction;
-import com.codingcritic.expensemanager.service.AccountService;
 import com.codingcritic.expensemanager.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +18,13 @@ public class TransactionController {
     private final TransactionService transactionService;
     @GetMapping("/transactions")
     @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<List<Transaction>> getTransactions(){
-        return ResponseEntity.ok().body(transactionService.getTransactions());
+    public ResponseEntity<List<Transaction>> getTransactions(@PathVariable("accountId") Long accountId) throws Exception{
+        return ResponseEntity.ok().body(transactionService.getTransactions(accountId));
     }
 
     @PostMapping("/transactions")
     @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<Transaction> addAccount(@PathVariable("accountId") Long accountId,
+    public ResponseEntity<Transaction> addTransaction(@PathVariable("accountId") Long accountId,
                                                   @RequestBody Transaction transaction) throws Exception{
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().toUriString());
         return ResponseEntity.created(uri).body(transactionService.saveTransaction(accountId, transaction));

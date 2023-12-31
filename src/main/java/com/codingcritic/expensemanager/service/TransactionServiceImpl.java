@@ -5,12 +5,12 @@ import com.codingcritic.expensemanager.model.Transaction;
 import com.codingcritic.expensemanager.model.TransactionType;
 import com.codingcritic.expensemanager.repository.AccountRepository;
 import com.codingcritic.expensemanager.repository.TransactionRepository;
-import com.codingcritic.expensemanager.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,7 +23,7 @@ public class TransactionServiceImpl implements TransactionService{
     @Override
     public Transaction saveTransaction(Long accountId,
                                        Transaction transactionRequest) throws Exception {
-        Transaction transaction = accountRepository.findById(accountId).map(account -> {
+        return accountRepository.findById(accountId).map(account -> {
             account.getTransactions().add(transactionRequest);
             TransactionType transactionType = transactionRequest.getTransactionType();
             if(transactionType == TransactionType.DEBIT){
@@ -33,13 +33,18 @@ public class TransactionServiceImpl implements TransactionService{
             }
             return transactionRepository.save(transactionRequest);
         }).orElseThrow(() -> new Exception("Not found Account with id = " + accountId));
-        return transaction;
+
     }
 
     @Override
-    public List<Transaction> getTransactions() {
+    public List<Transaction> getTransactions(Long accountId) throws Exception {
         log.info("Getting list of transactions");
-        return transactionRepository.findAll();
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new Exception("Not found Account with id = " + accountId));
+
+        List<Transaction> transactions = new ArrayList<Transaction>();
+        transactions.addAll(account.getTransactions());
+        return transactions;
     }
 
 }

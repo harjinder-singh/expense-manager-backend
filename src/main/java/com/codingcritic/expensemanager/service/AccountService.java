@@ -1,7 +1,6 @@
 package com.codingcritic.expensemanager.service;
 
 import com.codingcritic.expensemanager.model.Account;
-import com.codingcritic.expensemanager.model.AppUser;
 
 import java.util.List;
 
