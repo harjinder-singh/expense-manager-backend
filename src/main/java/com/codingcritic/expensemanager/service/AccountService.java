@@ -8,5 +8,5 @@ public interface AccountService {
 
     Account saveAccount(Long userId, Account accountRequest) throws Exception;
 
-    List<Account> getAccounts();
+    List<Account> getAccounts(Long userId) throws Exception;
 }

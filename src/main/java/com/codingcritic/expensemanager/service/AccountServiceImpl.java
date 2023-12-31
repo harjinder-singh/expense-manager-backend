@@ -1,6 +1,8 @@
 package com.codingcritic.expensemanager.service;
 
 import com.codingcritic.expensemanager.model.Account;
+import com.codingcritic.expensemanager.model.AppUser;
+import com.codingcritic.expensemanager.model.Transaction;
 import com.codingcritic.expensemanager.repository.AccountRepository;
 import com.codingcritic.expensemanager.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -8,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,8 +29,13 @@ public class AccountServiceImpl implements AccountService{
     }
 
     @Override
-    public List<Account> getAccounts() {
+    public List<Account> getAccounts(Long userId) throws Exception {
         log.info("Getting list of accounts");
-        return accountRepository.findAll();
+        AppUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception("Not found User with id = " + userId));
+
+        List<Account> accounts = new ArrayList<Account>();
+        accounts.addAll(user.getAccounts());
+        return accounts;
     }
 }

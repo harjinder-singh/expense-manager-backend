@@ -18,11 +18,12 @@ public class AccountController {
     private final AccountService accountService;
     @GetMapping("/accounts")
     @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<List<Account>> getAccounts(){
-        return ResponseEntity.ok().body(accountService.getAccounts());
+    public ResponseEntity<List<Account>> getAccounts(@PathVariable("userId") Long userId) throws Exception {
+        return ResponseEntity.ok().body(accountService.getAccounts(userId));
     }
 
     @PostMapping("/accounts")
+    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<Account> createAccount(@PathVariable("userId") Long userId,
                                                  @RequestBody Account account) throws Exception {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().toUriString());

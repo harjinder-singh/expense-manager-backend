@@ -17,11 +17,13 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users")
+    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<List<AppUser>> getUsers(){
         return ResponseEntity.ok().body(userService.getUsers());
     }
 
     @PostMapping("/users")
+    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<AppUser> addUser(@RequestBody AppUser user){
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().toUriString());
         return ResponseEntity.created(uri).body(userService.saveUser(user));
