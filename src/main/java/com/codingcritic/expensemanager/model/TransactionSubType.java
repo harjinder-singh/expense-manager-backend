@@ -1,5 +1,18 @@
 package com.codingcritic.expensemanager.model;
 
 public enum TransactionSubType {
-    RENT, GROCERY, SHOPPING, EATOUT, SALARY, TRANSFER, SNACK, RETURN, CASHBACK, MISCELLANEOUS
+    RENT("Rent"), GROCERY("Grocery"), SHOPPING("Shopping"), EATOUT("Eatout"),
+    SALARY("Salary"), TRANSFER("Transfer"), SNACK("Snack"), RETURN("Return"),
+    CASHBACK("Cashback"), UTILITY("Utility"), TRANSPORTATION("Transportation"),
+    MISCELLANEOUS("Miscellaneous");
+
+    private String type;
+    private TransactionSubType(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public String toString(){
+        return type;
+    }
 }
