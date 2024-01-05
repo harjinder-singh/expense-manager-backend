@@ -14,8 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Calendar;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -66,44 +67,51 @@ public class TransactionServiceImpl implements TransactionService{
     private Properties getJsonForChart(List<Transaction> transactions){
         Properties object = new Properties();
         for(Transaction transaction : transactions) {
-            Map<String, String> hm = new HashMap<>();
-            hm.put("0", "January");
-            hm.put("1", "Febraury");
-            hm.put("2", "March");
-            hm.put("3", "April");
-            hm.put("4", "May");
-            hm.put("5", "June");
-            hm.put("6", "July");
-            hm.put("7", "August");
-            hm.put("8", "September");
-            hm.put("9", "October");
-            hm.put("10", "November");
-            hm.put("11","December");
-
+            Map<String, String> months = getMonths();
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(transaction.getTransactionDate());
+            TransactionType transactionType = transaction.getTransactionType();
             if(object.containsKey(transaction.getTransactionSubType().toString())){
                 Properties ob = (Properties) object.get(transaction.getTransactionSubType().toString());
-                if(ob != null && !ob.isEmpty() && ob.containsKey(hm.get(Integer.toString(calendar.get(Calendar.MONTH))))){
-                    System.out.println(ob);
-                    System.out.println(ob.get(hm.get(Integer.toString(calendar.get(Calendar.MONTH)))));
-                    Double currentAmt = Double.valueOf(ob.get(hm.get(Integer.toString(calendar.get(Calendar.MONTH)))).toString());
-                    System.out.println(currentAmt);
-                    Double newAmt = currentAmt + (Double) transaction.getAmount();
-                    ob.put(hm.get(Integer.toString(calendar.get(Calendar.MONTH))), String.format("%.2f", newAmt));
+                System.out.println(ob.containsKey(months.get(Integer.toString(calendar.get(Calendar.MONTH)))));
+                if(ob != null && !ob.isEmpty() && ob.containsKey(months.get(Integer.toString(calendar.get(Calendar.MONTH))))){
+                    System.out.println("Inside if");
+                    Double currentAmt = Double.valueOf(ob.get(months.get(Integer.toString(calendar.get(Calendar.MONTH)))).toString());
+                    Double newAmt = transactionType == TransactionType.DEBIT ? (currentAmt + (Double) transaction.getAmount()) : (currentAmt - (Double) transaction.getAmount());
+                    ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))), String.format("%.2f", newAmt));
                     object.put(transaction.getTransactionSubType().toString(), ob);
                 }else{
-                    Properties ob1 = new Properties();
-                    ob1.put(hm.get(Integer.toString(calendar.get(Calendar.MONTH))), String.format("%.2f", transaction.getAmount()));
-                    object.put(transaction.getTransactionSubType().toString(), ob1);
+                    System.out.println("Inside else");
+                    ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))),
+                            String.format("%.2f", transactionType == TransactionType.DEBIT ? (transaction.getAmount()) : (transaction.getAmount() * -1)));
+                    object.put(transaction.getTransactionSubType().toString(), ob);
                 }
             }else{
                 Properties ob = new Properties();
-                ob.put(hm.get(Integer.toString(calendar.get(Calendar.MONTH))), String.format("%.2f", transaction.getAmount()));
+                ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))),
+                        String.format("%.2f", transactionType == TransactionType.DEBIT ? (transaction.getAmount()) : (transaction.getAmount() * -1)));
                 object.put(transaction.getTransactionSubType().toString(), ob);
             }
+            System.out.println(object);
         }
         return object;
+    }
+
+    private Map<String, String> getMonths(){
+        return Stream.of(new Object[][] {
+                {"0", "January"},
+                {"1", "Febraury"},
+                {"2", "March"},
+                {"3", "April"},
+                {"4", "May"},
+                {"5", "June"},
+                {"6", "July"},
+                {"7", "August"},
+                {"8", "September"},
+                {"9", "October"},
+                {"10", "November"},
+                {"11","December"}
+        }).collect(Collectors.toMap(data -> (String) data[0], data -> (String) data[1]));
     }
 
 }
