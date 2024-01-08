@@ -3,13 +3,16 @@ package com.codingcritic.expensemanager.service;
 import com.codingcritic.expensemanager.model.Account;
 import com.codingcritic.expensemanager.model.Transaction;
 import com.codingcritic.expensemanager.model.TransactionType;
+import com.codingcritic.expensemanager.helper.CSVHelper;
 import com.codingcritic.expensemanager.repository.AccountRepository;
 import com.codingcritic.expensemanager.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -64,6 +67,34 @@ public class TransactionServiceImpl implements TransactionService{
         return jo;
     }
 
+    @Override
+    public void saveTransactionsFromCSV(Long accountId, MultipartFile file) throws Exception{
+        try {
+            List<Transaction> transactions = CSVHelper.csvToTransactions(file.getInputStream());
+            accountRepository.findById(accountId).map(account -> {
+                double balance = getNewAmount(account.getBalance(), transactions);
+                account.getTransactions().addAll(transactions);
+                account.setBalance(Double.valueOf(String.format("%.2f", balance)));
+                return account;
+            });
+        } catch (IOException e) {
+            throw new Exception("Fail to store csv data: " + e.getMessage());
+        }
+    }
+
+    private double getNewAmount(double oldBalance, List<Transaction> transactions){
+        double balance = oldBalance;
+        for(Transaction transaction: transactions){
+            TransactionType transactionType = transaction.getTransactionType();
+            if(transactionType == TransactionType.DEBIT){
+                balance -= transaction.getAmount();
+            }else if(transactionType == TransactionType.CREDIT){
+                balance += transaction.getAmount();
+            }
+        }
+        return balance;
+    }
+
     private Properties getJsonForChart(List<Transaction> transactions){
         Properties object = new Properties();
         for(Transaction transaction : transactions) {
@@ -77,19 +108,17 @@ public class TransactionServiceImpl implements TransactionService{
                 if(ob != null && !ob.isEmpty() && ob.containsKey(months.get(Integer.toString(calendar.get(Calendar.MONTH))))){
                     System.out.println("Inside if");
                     Double currentAmt = Double.valueOf(ob.get(months.get(Integer.toString(calendar.get(Calendar.MONTH)))).toString());
-                    Double newAmt = transactionType == TransactionType.DEBIT ? (currentAmt + (Double) transaction.getAmount()) : (currentAmt - (Double) transaction.getAmount());
+                    Double newAmt = currentAmt + (Double) transaction.getAmount();
                     ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))), String.format("%.2f", newAmt));
                     object.put(transaction.getTransactionSubType().toString(), ob);
                 }else{
                     System.out.println("Inside else");
-                    ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))),
-                            String.format("%.2f", transactionType == TransactionType.DEBIT ? (transaction.getAmount()) : (transaction.getAmount() * -1)));
+                    ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))), transaction.getAmount());
                     object.put(transaction.getTransactionSubType().toString(), ob);
                 }
             }else{
                 Properties ob = new Properties();
-                ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))),
-                        String.format("%.2f", transactionType == TransactionType.DEBIT ? (transaction.getAmount()) : (transaction.getAmount() * -1)));
+                ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))), transaction.getAmount());
                 object.put(transaction.getTransactionSubType().toString(), ob);
             }
             System.out.println(object);
@@ -100,7 +129,7 @@ public class TransactionServiceImpl implements TransactionService{
     private Map<String, String> getMonths(){
         return Stream.of(new Object[][] {
                 {"0", "January"},
-                {"1", "Febraury"},
+                {"1", "February"},
                 {"2", "March"},
                 {"3", "April"},
                 {"4", "May"},

@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -40,4 +41,12 @@ public class Transaction {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Transaction(String description, double amount, TransactionType transactionType, TransactionSubType transactionSubType, Date transactionDate){
+        this.description = description;
+        this.amount = amount;
+        this.transactionType = transactionType;
+        this.transactionSubType = transactionSubType;
+        this.transactionDate = transactionDate;
+    }
 }
