@@ -31,7 +31,7 @@ public class CSVHelper {
     return true;
   } 
 
-  public static List<Transaction> csvToTransactions(InputStream is) throws NumberFormatException, ParseException {
+  public static List<Transaction> csvToTransactions(InputStream is, String format) throws NumberFormatException, ParseException {
     try (
         BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         CSVParser csvParser = new CSVParser(fileReader,
@@ -40,7 +40,8 @@ public class CSVHelper {
       List<Transaction> transactions = new ArrayList<Transaction>();
 
       Iterable<CSVRecord> csvRecords = csvParser.getRecords();
-      SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+      // SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+      SimpleDateFormat sdf = new SimpleDateFormat(format);
     
       for (CSVRecord csvRecord : csvRecords) {
         System.out.println("Inside for");

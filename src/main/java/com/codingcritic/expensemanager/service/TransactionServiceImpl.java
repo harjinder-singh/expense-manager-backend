@@ -58,19 +58,20 @@ public class TransactionServiceImpl implements TransactionService{
     @Override
     public Properties getTransactionsForChart(Long accountId) throws Exception {
         log.info("Getting list of transactions");
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new Exception("Not found Account with id = " + accountId));
+        // Account account = accountRepository.findById(accountId)
+        //        .orElseThrow(() -> new Exception("Not found Account with id = " + accountId));
 
-        List<Transaction> transactions = new ArrayList<Transaction>();
-        transactions.addAll(account.getTransactions());
+        // List<Transaction> transactions = new ArrayList<Transaction>();
+        List<Transaction> transactions = transactionRepository.findAll();
+        // transactions.addAll(account.getTransactions());
         Properties jo = getJsonForChart(transactions);
         return jo;
     }
 
     @Override
-    public void saveTransactionsFromCSV(Long accountId, MultipartFile file) throws Exception{
+    public void saveTransactionsFromCSV(Long accountId, MultipartFile file, String format) throws Exception{
         try {
-            List<Transaction> transactions = CSVHelper.csvToTransactions(file.getInputStream());
+            List<Transaction> transactions = CSVHelper.csvToTransactions(file.getInputStream(), format);
             accountRepository.findById(accountId).map(account -> {
                 double balance = getNewAmount(account.getBalance(), transactions);
                 account.getTransactions().addAll(transactions);
@@ -101,7 +102,6 @@ public class TransactionServiceImpl implements TransactionService{
             Map<String, String> months = getMonths();
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(transaction.getTransactionDate());
-            TransactionType transactionType = transaction.getTransactionType();
             if(object.containsKey(transaction.getTransactionSubType().toString())){
                 Properties ob = (Properties) object.get(transaction.getTransactionSubType().toString());
                 System.out.println(ob.containsKey(months.get(Integer.toString(calendar.get(Calendar.MONTH)))));
@@ -113,12 +113,12 @@ public class TransactionServiceImpl implements TransactionService{
                     object.put(transaction.getTransactionSubType().toString(), ob);
                 }else{
                     System.out.println("Inside else");
-                    ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))), transaction.getAmount());
+                    ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))), String.format("%.2f", transaction.getAmount()));
                     object.put(transaction.getTransactionSubType().toString(), ob);
                 }
             }else{
                 Properties ob = new Properties();
-                ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))), transaction.getAmount());
+                ob.put(months.get(Integer.toString(calendar.get(Calendar.MONTH))), String.format("%.2f", transaction.getAmount()));
                 object.put(transaction.getTransactionSubType().toString(), ob);
             }
             System.out.println(object);

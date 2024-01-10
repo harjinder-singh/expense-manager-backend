@@ -14,5 +14,5 @@ public interface TransactionService {
 
     Properties getTransactionsForChart(Long accountId) throws Exception;
 
-    void saveTransactionsFromCSV(Long accountId, MultipartFile file) throws Exception;
+    void saveTransactionsFromCSV(Long accountId, MultipartFile file, String format) throws Exception;
 }

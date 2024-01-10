@@ -44,12 +44,13 @@ public class TransactionController {
 
     @PostMapping("/uploadCSV")
     @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<String> uploadFile(@PathVariable("accountId") Long accountId, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadFile(@PathVariable("accountId") Long accountId, @RequestParam("file") MultipartFile file, @RequestParam("formatType") String format) {
         String message = "";
+        System.out.println("Format: " + format);
 
         if (CSVHelper.hasCSVFormat(file)) {
             try {
-                transactionService.saveTransactionsFromCSV(accountId, file);
+                transactionService.saveTransactionsFromCSV(accountId, file, format);
                 message = "Uploaded the file successfully: ";
                 return ResponseEntity.status(HttpStatus.OK).body(message);
             } catch (Exception e) {
