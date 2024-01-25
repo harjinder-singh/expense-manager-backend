@@ -44,7 +44,10 @@ public class TransactionController {
 
     @PostMapping("/uploadCSV")
     @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<String> uploadFile(@PathVariable("accountId") Long accountId, @RequestParam("file") MultipartFile file, @RequestParam("formatType") String format) {
+    public ResponseEntity<String> uploadFile(
+            @PathVariable("accountId") Long accountId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("formatType") String format) {
         String message = "";
         System.out.println("Format: " + format);
 
